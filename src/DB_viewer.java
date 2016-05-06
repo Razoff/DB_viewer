@@ -1,6 +1,12 @@
-import java.sql.*;
-import oracle.jdbc.*;
-import oracle.jdbc.pool.OracleDataSource;
+import java.awt.Color;
+import java.awt.Component;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import javax.swing.BoxLayout;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 public class DB_viewer {
 
@@ -10,23 +16,15 @@ public class DB_viewer {
 	
 	private static ConnectionManager connManager;
 	
-	public static void main(String[] args) throws SQLException {
+	public DB_viewer() throws SQLException{
 		connManager = new ConnectionManager(url, username, password);
 		Connection conn = connManager.getConnection();
-		
-	    // Create a statement
-	    Statement stmt = conn.createStatement();
-
-	    // Do the SQL "Hello World" thing
-	    ResultSet rset = stmt.executeQuery("select aut_name from AUTHOR where aut_id <= 12");
-
-	    while (rset.next())
-	      System.out.println(rset.getString(1));
-	    // close the result set, the statement and connect
-	    rset.close();
-	    stmt.close();
-	    conn.close();
-	    System.out.println("Your JDBC installation is correct.");
-	  }
+		new ViewerFrame();
+	}
+	
+	
+	public static void main(String[] args) throws SQLException {
+		new DB_viewer();
+	}
 
 }
