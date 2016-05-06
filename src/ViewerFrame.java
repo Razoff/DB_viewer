@@ -30,7 +30,7 @@ public class ViewerFrame extends JFrame{
 				
 		JPanel filterPanel = new JPanel();
 		filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.PAGE_AXIS));
-		filterPanel.setBackground(Color.white);
+		//filterPanel.setBackground(Color.white);
 		
 		JPanel filterIntroPanel = new JPanel();
 		filterIntroPanel.setLayout(new BoxLayout(filterIntroPanel, BoxLayout.LINE_AXIS));
@@ -43,6 +43,7 @@ public class ViewerFrame extends JFrame{
 		JLabel lb2 = new JLabel(" where:");
 		filterIntroPanel.add(lb2);
 		filterIntroPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+		filterIntroPanel.setMaximumSize(filterIntroPanel.getPreferredSize());
 		filterPanel.add(filterIntroPanel);
 		
 
@@ -70,10 +71,18 @@ public class ViewerFrame extends JFrame{
 	    }
 
 	    filterPanel1.setAlignmentX(Component.CENTER_ALIGNMENT);
-		filterPanel.add(filterPanel1);
+	    filterPanel1.setMaximumSize(filterPanel1.getPreferredSize());
+	    filterPanel.add(filterPanel1);
 		
-
 		mainPanel.add(filterPanel, BorderLayout.PAGE_START);
+		
+		JPanel centerPanel = new JPanel();
+		centerPanel.setSize(800,400);
+		//centerPanel.setBackground(Color.WHITE);
+		//centerPanel.add(new JLabel("Test"));
+		
+		mainPanel.add(centerPanel, BorderLayout.CENTER);
+		
 		
 		
 		return mainPanel;
