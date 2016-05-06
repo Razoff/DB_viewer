@@ -4,19 +4,16 @@ import oracle.jdbc.pool.OracleDataSource;
 
 public class DB_viewer {
 
+	private static final String url = "jdbc:oracle:thin:@diassrv2.epfl.ch:1521:orcldias";
+	private static final String username = "DB2016_G44";
+	private static final String password = "DB2016_G44";
+	
+	private static ConnectionManager connManager;
+	
 	public static void main(String[] args) throws SQLException {
-		String url = "jdbc:oracle:thin:@diassrv2.epfl.ch:1521:orcldias";
-		//"jdbc:mysql://localhost:3306/javabase";
-		String username = "DB2016_G44";
-		String password = "DB2016_G44";
-
-		OracleDataSource ods = new OracleDataSource();
-	    ods.setURL(url);
-	    ods.setUser(username);
-	    ods.setPassword(password);
-	    Connection conn = ods.getConnection();
-	    System.out.println("connected.");
-
+		connManager = new ConnectionManager(url, username, password);
+		Connection conn = connManager.getConnection();
+		
 	    // Create a statement
 	    Statement stmt = conn.createStatement();
 
