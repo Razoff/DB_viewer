@@ -16,15 +16,10 @@ public class DB_viewer {
 	
 	private static ConnectionManager connManager;
 	
-	public DB_viewer() throws SQLException{
-		connManager = new ConnectionManager(url, username, password);
-		Connection conn = connManager.getConnection();
-		new ViewerFrame();
-	}
-	
-	
 	public static void main(String[] args) throws SQLException {
-		new DB_viewer();
+		//connManager = new ConnectionManager(url, username, password);
+		//Connection conn = connManager.getConnection();
+		new ViewerFrame();
 	}
 
 }
