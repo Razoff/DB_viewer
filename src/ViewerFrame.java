@@ -48,7 +48,6 @@ public class ViewerFrame extends JFrame{
 		BoxLayout filterLayout = new BoxLayout(filtersPanel, BoxLayout.PAGE_AXIS);
 		filtersPanel.setLayout(filterLayout);
 		filtersPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-		//filterPanel.setBackground(Color.white);
 		
 		JPanel filterIntroPanel = new JPanel();
 		filterIntroPanel.setLayout(new BoxLayout(filterIntroPanel, BoxLayout.LINE_AXIS));
@@ -57,6 +56,7 @@ public class ViewerFrame extends JFrame{
 		JLabel lb = new JLabel("Search in the table ");
 		filterIntroPanel.add(lb);
 		tablesBox = new JComboBox<>(tables);
+		tablesBox.setMaximumSize(tablesBox.getPreferredSize());
 		filterIntroPanel.add(tablesBox);
 		JLabel lb2 = new JLabel(" where:");
 		filterIntroPanel.add(lb2);
@@ -66,7 +66,6 @@ public class ViewerFrame extends JFrame{
 		filtersPanel.add(filterIntroPanel);
 		//filterPanel.add(Box.createVerticalGlue());
 
-		filtersPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 		filtersPanel.add(createFilterPanel());
 		
 		mainPanel.add(filtersPanel, BorderLayout.PAGE_START);
@@ -91,8 +90,10 @@ public class ViewerFrame extends JFrame{
 		filterPanel.add(Box.createHorizontalGlue());
 		
 		JComboBox fieldsBox = new JComboBox<>(fields);
+		fieldsBox.setMaximumSize(fieldsBox.getPreferredSize());
 		filterPanel.add(fieldsBox);
 		JComboBox<String> operatorsCombox = new JComboBox<>(operators);
+		operatorsCombox.setMaximumSize(operatorsCombox.getPreferredSize());
 		filterPanel.add(operatorsCombox);
 		
 		JTextField valueTextField = new JTextField("value");
@@ -111,10 +112,10 @@ public class ViewerFrame extends JFrame{
 		filterPanel.add(trashButton);
 		
 		trashButton.addActionListener(e -> {
-			if(filtersPanel.getComponents().length > 4){
+			if(filtersPanel.getComponents().length > 3){
 				filtersPanel.remove(filterPanel);
-				filtersPanel.validate();
-				filtersPanel.repaint();
+				mainPanel.validate();
+				mainPanel.repaint();
 			}
 		});
 		
@@ -130,15 +131,15 @@ public class ViewerFrame extends JFrame{
 		filterPanel.add(plusButton);
 		
 		plusButton.addActionListener(e -> {
-			System.out.println("plus");
-			filtersPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 			filtersPanel.add(createFilterPanel());
 			mainPanel.validate();
 			mainPanel.repaint();
 		});
 
 	    filterPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+	    filterPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
 	    filterPanel.add(Box.createHorizontalGlue());
+	    
 		return filterPanel;
 	}
 	
