@@ -3,8 +3,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -20,12 +20,14 @@ import javax.swing.JTextField;
 
 public class ViewerFrame extends JFrame{
 
-	private static JPanel mainPanel, filterPanel, displayPanel;
+	private static JPanel mainPanel, filtersPanel, displayPanel;
 	private static JLabel contentLabel;
-	private static JComboBox<String> tablesBox, fieldsBox;
+	private static JComboBox<String> tablesBox;
 	
 	//TODO: Replace with a better solution
 	private static String[] tables = {"Authors", "Awards", "Awards Categories", "Awards Types", "Languages", "Notes", "Publishers", "Publications", "Publications Series", "Publications Authors", "Publications Content", "Reviews", "Tags", "Title", "Title Awards", "Title Series", "Title Tags", "Webpages"};
+	private static String[] fields = {"Name", "ID"}; 
+	private static String[] operators = {" = ", " < ", " <= ", " > ", " >= "};
 	
 	public ViewerFrame(){
 		super();
@@ -42,10 +44,10 @@ public class ViewerFrame extends JFrame{
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BorderLayout());
 				
-		filterPanel = new JPanel();
-		BoxLayout filterLayout = new BoxLayout(filterPanel, BoxLayout.PAGE_AXIS);
-		filterPanel.setLayout(filterLayout);
-		filterPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+		filtersPanel = new JPanel();
+		BoxLayout filterLayout = new BoxLayout(filtersPanel, BoxLayout.PAGE_AXIS);
+		filtersPanel.setLayout(filterLayout);
+		filtersPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 		//filterPanel.setBackground(Color.white);
 		
 		JPanel filterIntroPanel = new JPanel();
@@ -61,13 +63,13 @@ public class ViewerFrame extends JFrame{
 		filterIntroPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 		
 		filterIntroPanel.add(Box.createHorizontalGlue());
-		filterPanel.add(filterIntroPanel);
+		filtersPanel.add(filterIntroPanel);
 		//filterPanel.add(Box.createVerticalGlue());
 
-		filterPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-	    filterPanel.add(createFilterPanel());
-	    
-		mainPanel.add(filterPanel, BorderLayout.PAGE_START);
+		filtersPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+		filtersPanel.add(createFilterPanel());
+		
+		mainPanel.add(filtersPanel, BorderLayout.PAGE_START);
 		
 		displayPanel = new JPanel();
 		displayPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -88,10 +90,8 @@ public class ViewerFrame extends JFrame{
 		filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.LINE_AXIS));
 		filterPanel.add(Box.createHorizontalGlue());
 		
-		String[] fields = {"Name", "ID"};
-		fieldsBox = new JComboBox<>(fields);
+		JComboBox fieldsBox = new JComboBox<>(fields);
 		filterPanel.add(fieldsBox);
-		String[] operators = {" = ", " < ", " <= ", " > ", " >= "};
 		JComboBox<String> operatorsCombox = new JComboBox<>(operators);
 		filterPanel.add(operatorsCombox);
 		
@@ -110,6 +110,14 @@ public class ViewerFrame extends JFrame{
 		trashButton.setContentAreaFilled(false);
 		filterPanel.add(trashButton);
 		
+		trashButton.addActionListener(e -> {
+			if(filtersPanel.getComponents().length > 4){
+				filtersPanel.remove(filterPanel);
+				filtersPanel.validate();
+				filtersPanel.repaint();
+			}
+		});
+		
 		BufferedImage plusIcon = null;
 		try {
 			plusIcon = ImageIO.read(getClass().getResource("images/plus_mini.png"));
@@ -120,6 +128,14 @@ public class ViewerFrame extends JFrame{
 		plusButton.setBorder(BorderFactory.createEmptyBorder());
 		plusButton.setContentAreaFilled(false);
 		filterPanel.add(plusButton);
+		
+		plusButton.addActionListener(e -> {
+			System.out.println("plus");
+			filtersPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+			filtersPanel.add(createFilterPanel());
+			mainPanel.validate();
+			mainPanel.repaint();
+		});
 
 	    filterPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 	    filterPanel.add(Box.createHorizontalGlue());
