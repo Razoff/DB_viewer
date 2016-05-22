@@ -4,7 +4,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.List;
+import java.sql.Connection;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -24,13 +24,19 @@ public class ViewerFrame extends JFrame{
 	private static JLabel contentLabel;
 	private static JComboBox<String> tablesBox;
 	
+	
+	
+	//private static String[] tables = {"Authors", "Awards", "Awards Categories", "Awards Types", "Languages", "Notes", "Publishers", "Publications", "Publications Series", "Publications Authors", "Publications Content", "Reviews", "Tags", "Title", "Title Awards", "Title Series", "Title Tags", "Webpages"};
+	private static String[] tables;
+	private static String[] fields;
 	//TODO: Replace with a better solution
-	private static String[] tables = {"Authors", "Awards", "Awards Categories", "Awards Types", "Languages", "Notes", "Publishers", "Publications", "Publications Series", "Publications Authors", "Publications Content", "Reviews", "Tags", "Title", "Title Awards", "Title Series", "Title Tags", "Webpages"};
-	private static String[] fields = {"Name", "ID"}; 
 	private static String[] operators = {" = ", " < ", " <= ", " > ", " >= "};
 	
-	public ViewerFrame(){
+	public ViewerFrame(Connection conn){
 		super();
+		tables = DBManager.getTablesList(conn);
+		fields = DBManager.getFieldList(conn, tables[0]);
+		
 		setTitle("DB Viewer");
 		setSize(800, 600);
 		setResizable(true);
@@ -38,6 +44,7 @@ public class ViewerFrame extends JFrame{
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setContentPane(initLayout());
 		setVisible(true);
+		
 	}
  
 	private JPanel initLayout(){
@@ -55,7 +62,7 @@ public class ViewerFrame extends JFrame{
 		
 		JLabel lb = new JLabel("Search in the table ");
 		filterIntroPanel.add(lb);
-		tablesBox = new JComboBox<>(tables);
+		tablesBox = new JComboBox<>(tables);//DBManager.tables.keySet().toArray(new String[0]));
 		tablesBox.setMaximumSize(tablesBox.getPreferredSize());
 		filterIntroPanel.add(tablesBox);
 		JLabel lb2 = new JLabel(" where:");
@@ -90,10 +97,10 @@ public class ViewerFrame extends JFrame{
 		filterPanel.add(Box.createHorizontalGlue());
 		
 		JComboBox fieldsBox = new JComboBox<>(fields);
-		fieldsBox.setMaximumSize(fieldsBox.getPreferredSize());
+		//fieldsBox.setMaximumSize(fieldsBox.getPreferredSize());
 		filterPanel.add(fieldsBox);
 		JComboBox<String> operatorsCombox = new JComboBox<>(operators);
-		operatorsCombox.setMaximumSize(operatorsCombox.getPreferredSize());
+		//operatorsCombox.setMaximumSize(operatorsCombox.getPreferredSize());
 		filterPanel.add(operatorsCombox);
 		
 		JTextField valueTextField = new JTextField("value");

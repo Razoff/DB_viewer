@@ -17,9 +17,9 @@ public class DB_viewer {
 	private static ConnectionManager connManager;
 	
 	public static void main(String[] args) throws SQLException {
-		//connManager = new ConnectionManager(url, username, password);
-		//Connection conn = connManager.getConnection();
-		new ViewerFrame();
+		connManager = new ConnectionManager(url, username, password);
+		Connection conn = connManager.getConnection();
+		new ViewerFrame(conn);
 	}
 
 }
