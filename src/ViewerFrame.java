@@ -5,11 +5,13 @@ import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.sql.Connection;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -23,8 +25,9 @@ public class ViewerFrame extends JFrame{
 	private static JPanel mainPanel, filtersPanel, displayPanel;
 	private static JLabel contentLabel;
 	private static JComboBox<String> tablesBox;
+	private static ArrayList<JComboBox<String>> fieldsBoxes;
 	
-	
+	private static Connection conn;
 	
 	//private static String[] tables = {"Authors", "Awards", "Awards Categories", "Awards Types", "Languages", "Notes", "Publishers", "Publications", "Publications Series", "Publications Authors", "Publications Content", "Reviews", "Tags", "Title", "Title Awards", "Title Series", "Title Tags", "Webpages"};
 	private static String[] tables;
@@ -34,8 +37,10 @@ public class ViewerFrame extends JFrame{
 	
 	public ViewerFrame(Connection conn){
 		super();
+		this.conn = conn;
 		tables = DBManager.getTablesList(conn);
 		fields = DBManager.getFieldList(conn, tables[0]);
+		fieldsBoxes = new ArrayList<>();
 		
 		setTitle("DB Viewer");
 		setSize(800, 600);
@@ -64,6 +69,13 @@ public class ViewerFrame extends JFrame{
 		filterIntroPanel.add(lb);
 		tablesBox = new JComboBox<>(tables);//DBManager.tables.keySet().toArray(new String[0]));
 		tablesBox.setMaximumSize(tablesBox.getPreferredSize());
+		tablesBox.addActionListener(e -> {
+			fields = DBManager.getFieldList(conn, (String)tablesBox.getSelectedItem());
+			DefaultComboBoxModel model = new DefaultComboBoxModel(fields);
+			for(JComboBox<String> f : fieldsBoxes){
+				f.setModel(model);
+			}
+		});
 		filterIntroPanel.add(tablesBox);
 		JLabel lb2 = new JLabel(" where:");
 		filterIntroPanel.add(lb2);
@@ -99,6 +111,7 @@ public class ViewerFrame extends JFrame{
 		JComboBox fieldsBox = new JComboBox<>(fields);
 		//fieldsBox.setMaximumSize(fieldsBox.getPreferredSize());
 		filterPanel.add(fieldsBox);
+		fieldsBoxes.add(fieldsBox);
 		JComboBox<String> operatorsCombox = new JComboBox<>(operators);
 		//operatorsCombox.setMaximumSize(operatorsCombox.getPreferredSize());
 		filterPanel.add(operatorsCombox);
@@ -121,6 +134,7 @@ public class ViewerFrame extends JFrame{
 		trashButton.addActionListener(e -> {
 			if(filtersPanel.getComponents().length > 3){
 				filtersPanel.remove(filterPanel);
+				fieldsBoxes.remove(fieldsBox);
 				mainPanel.validate();
 				mainPanel.repaint();
 			}
