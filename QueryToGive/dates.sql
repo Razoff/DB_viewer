@@ -1,0 +1,3 @@
+select AW_DATE
+from AWARDS
+where TO_NUMBER(SUBSTR(AW_DATE, 1, 4), '9999') = 2001
