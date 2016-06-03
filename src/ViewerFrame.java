@@ -2,12 +2,16 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -30,7 +34,6 @@ import javax.swing.table.DefaultTableModel;
 public class ViewerFrame extends JFrame{
 
 	public static JPanel mainPanel, filtersPanel, buttonPanel, displayPanel;
-	public static JLabel contentLabel;
 	public static JTable resultTable;
 	public static JSpinner limitSpinner;
 	public static JComboBox<String> tablesBox;
@@ -38,7 +41,6 @@ public class ViewerFrame extends JFrame{
 	
 	private static Connection conn;
 	
-	//private static String[] tables = {"Authors", "Awards", "Awards Categories", "Awards Types", "Languages", "Notes", "Publishers", "Publications", "Publications Series", "Publications Authors", "Publications Content", "Reviews", "Tags", "Title", "Title Awards", "Title Series", "Title Tags", "Webpages"};
 	public static String[] tables;
 	public static Map<String,String> fields;
 	public static ResultSet resultSet;
@@ -115,7 +117,7 @@ public class ViewerFrame extends JFrame{
 					filters.add(new Filter(left,op,right));
 				}
 			}
-			ResultSet res = DBManager.doQuery(conn, fields,(String)tablesBox.getSelectedItem(), filters, (Integer)limitSpinner.getValue());
+			ResultSet res = DBManager.doAndQuery(conn, fields,(String)tablesBox.getSelectedItem(), filters, (Integer)limitSpinner.getValue());
 			try {
 				resultTable.setModel(buildTableModel(res));
 				mainPanel.validate();
@@ -139,13 +141,24 @@ public class ViewerFrame extends JFrame{
 		displayPanel.setBorder(BorderFactory.createCompoundBorder(
 	    	       BorderFactory.createEmptyBorder(10, 10, 10, 10),
 	    	       BorderFactory.createMatteBorder(2, 0, 0, 0, Color.BLACK)));
-		//centerPanel.setSize(800,400);
-		//contentLabel = new JLabel("Test");
-		//displayPanel.add(contentLabel);
 		displayPanel.setLayout(new BorderLayout());
 		resultTable = new JTable();
 		JScrollPane scrollPane = new JScrollPane(resultTable);
 		resultTable.setFillsViewportHeight(true);
+		resultTable.addMouseListener(new MouseAdapter() {
+		    public void mousePressed(MouseEvent me) {
+		        JTable table =(JTable) me.getSource();
+		        Point p = me.getPoint();
+		        int row = table.rowAtPoint(p);
+		        if (me.getClickCount() == 2) {
+		            Map<String, Object> rowData = new HashMap<>();
+		        	for(int i = 0; i < table.getColumnCount(); i++){
+		        		rowData.put(table.getColumnName(i), table.getValueAt(row, i));
+		            }
+		        	new EditFrame(conn, (String)tablesBox.getSelectedItem(), fields, rowData);
+		        }
+		    }
+		});
 		displayPanel.add(scrollPane, BorderLayout.CENTER);
 		mainPanel.add(displayPanel, BorderLayout.CENTER);
 		

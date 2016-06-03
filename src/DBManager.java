@@ -64,16 +64,19 @@ public class DBManager {
 	}
 	
 	private static String filterToString(Filter f, Map<String, String> fields){
-		String result = f.left + f.op;
+		String result = "";
 		if(fields.get(f.left).equals("VARCHAR2") || fields.get(f.left).equals("VARCHAR")){
-			result += "'" + f.right + "'";
-		} else{
-			result += f.right;
+			result += f.left + f.op + "'" + f.right + "'";
+		} else if(fields.get(f.left).equals("CLOB")){
+			result += " dbms_lob.compare("+f.left+", to_clob('"+f.right+"')) = 0";
+		}
+		else{
+			result += f.left + f.op + f.right;
 		}
 		return result;
 	}
 	
-	public static ResultSet doQuery(Connection conn, Map<String,String> fields, String table, List<Filter> conditions, int limit){
+	public static ResultSet doAndQuery(Connection conn, Map<String,String> fields, String table, List<Filter> conditions, int limit){
 		try {
 			String query = "SELECT * FROM " + table;
 
@@ -98,12 +101,6 @@ public class DBManager {
 			}
 			System.out.println(query);
 			PreparedStatement pstmt = conn.prepareStatement(query);
-			/*for(int i = 0; i < conditions.size(); i++){
-				System.out.println(1 + 2*i + " " + conditions.get(i).left);
-				System.out.println((1 + 2*i + 1) + " " + conditions.get(i).right);
-				pstmt.setString(1 + 2*i, conditions.get(i).left);
-				pstmt.setString(1 + 2*i + 1, conditions.get(i).right);
-			}*/
 			ResultSet rset = pstmt.executeQuery();
 			return rset;
 		} catch (SQLException e) {
@@ -111,4 +108,91 @@ public class DBManager {
 		}
 		return null;
 	}
+	
+	public static ResultSet doOrQuery(Connection conn, Map<String,String> fields, String table, List<Filter> conditions, int limit){
+		try {
+			String query = "SELECT * FROM " + table;
+
+			if(conditions.size() > 0 || limit > 0){
+				query += " Where ";
+			}
+			
+			if(conditions.size() > 0){
+				query += filterToString(conditions.get(0), fields);
+				
+			}
+			
+			for(int i = 1; i < conditions.size(); i++){
+				query += " OR ";
+				query += filterToString(conditions.get(i), fields);
+			}
+			if(limit > 0){
+				if(conditions.size() > 0){
+					query += " AND ";
+				}
+				query += " rownum <= " + limit;
+			}
+			System.out.println(query);
+			PreparedStatement pstmt = conn.prepareStatement(query);
+			ResultSet rset = pstmt.executeQuery();
+			return rset;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	
+	/*public static void doUpdate(Connection conn, String table, Map<String,String> fields, Map<String, String> oldValues, Map<String, String> Newvalues){
+		//try {
+			String query = "UPDATE " + table + " (" ;
+			String columns = "";
+			String datas = "";
+			for(String k : fields.keySet()){
+				columns += k + ",";
+				if(values.get(k).equals("null")){
+					datas += "null,";
+				}
+				else if(fields.get(k).equals("NUMBER")){
+					datas += values.get(k) + ",";
+				} else {
+					datas += "'" + values.get(k) + "',";
+				}
+			}
+			query += columns.substring(0, columns.length()-1) + ")";
+			query += " (" + datas.substring(0, datas.length()-1) + ")";
+			System.out.println(query);
+			//PreparedStatement pstmt = conn.prepareStatement(query);
+			//ResultSet rset = pstmt.executeQuery();
+		/*} catch (SQLException e) {
+			e.printStackTrace();
+		}*/
+	//}
+	
+	public static void doInsert(Connection conn, String table, Map<String,String> fields, Map<String, String> values){
+		//try {
+			String query = "INSERT INTO " + table + " (" ;
+			String columns = "";
+			String datas = "";
+			for(String k : fields.keySet()){
+				columns += k + ",";
+				if(values.get(k).equals("null")){
+					datas += "null,";
+				}
+				else if(fields.get(k).equals("NUMBER")){
+					datas += values.get(k) + ",";
+				} else {
+					datas += "'" + values.get(k) + "',";
+				}
+			}
+			query += columns.substring(0, columns.length()-1) + ")";
+			query += " (" + datas.substring(0, datas.length()-1) + ")";
+			System.out.println(query);
+			//PreparedStatement pstmt = conn.prepareStatement(query);
+			//ResultSet rset = pstmt.executeQuery();
+		/*} catch (SQLException e) {
+			e.printStackTrace();
+		}*/
+	}
+	
 }
