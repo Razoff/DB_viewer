@@ -1,6 +1,7 @@
 import java.awt.Component;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -26,15 +27,17 @@ public class FilterPanel extends JPanel {
 		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 		add(Box.createHorizontalGlue());
 		
-		fieldsBox = new JComboBox<>(frame.fields);
+		String[] fieldsNames= frame.fields.keySet().toArray(new String[frame.fields.keySet().size()]);
+		Arrays.sort(fieldsNames);
+		fieldsBox = new JComboBox<>(fieldsNames);
 		//fieldsBox.setMaximumSize(fieldsBox.getPreferredSize());
 		add(fieldsBox);
-		frame.fieldsBoxes.add(fieldsBox);
+		frame.filterList.add(this);
 		operatorsCombox = new JComboBox<>(operators);
 		//operatorsCombox.setMaximumSize(operatorsCombox.getPreferredSize());
 		add(operatorsCombox);
 		
-		valueTextField = new JTextField("value");
+		valueTextField = new JTextField(" Default value ");
 		valueTextField.setMaximumSize(operatorsCombox.getPreferredSize());
 		add(valueTextField);
 		
@@ -50,9 +53,9 @@ public class FilterPanel extends JPanel {
 		add(trashButton);
 		
 		trashButton.addActionListener(e -> {
-			if(frame.fieldsBoxes.size() > 1){
+			if(frame.filterList.size() > 1){
 				frame.filtersPanel.remove(this);
-				frame.fieldsBoxes.remove(fieldsBox);
+				frame.filterList.remove(this);
 				frame.mainPanel.validate();
 				frame.mainPanel.repaint();
 			}
