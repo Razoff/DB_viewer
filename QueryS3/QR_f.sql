@@ -1,4 +1,4 @@
-SELECT *
+SELECT q1.tit, q1.lang, q1.rec
 FROM (SELECT tii.T_TITLE as tit, count(tii.T_TITLE) as nbTrad, tii.LANGUAGE_ID as lang, 
       ROW_NUMBER () OVER (PARTITION BY tii.LANGUAGE_ID
                     ORDER BY count(tii.T_TITLE) DESC) as rec

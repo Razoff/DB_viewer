@@ -6,4 +6,4 @@ FROM (SELECT ps.PUB_NAME as one , count(pub.P_ID)
       GROUP BY ps.PUB_NAME
       ORDER BY -count(pub.P_ID)) q 
       -- this give sus the ordered list of the number of publisher for the year
-WHERE ROWNUM < 2 -- only keep the biggest num
+WHERE ROWNUM < 4 -- only keep the biggest num
