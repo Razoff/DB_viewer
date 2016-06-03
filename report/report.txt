@@ -1,0 +1,31 @@
+query a:
+	time : 2.61s
+
+query b:
+	time : 0.556s
+
+query c:
+
+query d:
+
+query e:
+
+query f:
+
+query g:
+
+query h:
+
+query i:
+
+query j:
+
+query k:
+
+query l:
+
+query m:
+
+query n:
+
+query o:

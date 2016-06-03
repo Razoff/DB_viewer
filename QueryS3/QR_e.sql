@@ -1,6 +1,6 @@
 SELECT q3.them
 FROM(SELECT tl.T_TITLE as them, count(rw.REVIEW_ID)
-      FROM (SELECT pc.TITLE_ID as titID
+      FROM (SELECT DISTINCT pc.TITLE_ID as titID
             FROM  (SELECT pa.PUBLICATION_ID as pubID
                     FROM AUTHOR aut, PUBLICATION_AUTHORS pa
                     WHERE aut.AUT_NAME = 'Tracy Fobes'
