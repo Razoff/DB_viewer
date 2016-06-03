@@ -41,4 +41,32 @@ public class DBManager {
 		}
 		return null;
 	}
+	
+	
+	public static ResultSet doQuery(Connection conn, Filter[] conditions){
+		try {
+			String query = "SELECT column_name FROM ? WHERE ";
+			if(conditions.length > 1){
+				query += "? "+ conditions[0].op  + " ?";
+			}
+			
+			for(int i = 1; i < conditions.length; i++){
+				query += " AND ";
+				query += "? "+ conditions[i].op  + " ?";
+			}
+			query += ";";
+					
+			PreparedStatement pstmt = conn.prepareStatement(query);
+			for(int i = 0; i < conditions.length; i++){
+				pstmt.setString(2*i, conditions[i].left);
+				pstmt.setString(2*i+1, conditions[i].right);
+			}
+			ResultSet rset = pstmt.executeQuery();
+
+			return rset;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 }
