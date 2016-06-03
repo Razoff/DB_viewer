@@ -1,4 +1,4 @@
-SELECT tit.T_TITLE
+SELECT tit.T_TITLE  
 FROM  (SELECT q1.title as theOne, count(q1.rew) + COUNT(q1.awd)
       FROM  (SELECT DISTINCT rw.TITLE_ID as title , rw.REVIEW_ID as rew, ta.AWARD_ID as awd
             FROM REVIEW rw , TITLE_AWARD ta
