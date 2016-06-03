@@ -22,18 +22,16 @@ import javax.swing.JTextField;
 
 public class ViewerFrame extends JFrame{
 
-	private static JPanel mainPanel, filtersPanel, displayPanel;
-	private static JLabel contentLabel;
-	private static JComboBox<String> tablesBox;
-	private static ArrayList<JComboBox<String>> fieldsBoxes;
+	public static JPanel mainPanel, filtersPanel, buttonPanel, displayPanel;
+	public static JLabel contentLabel;
+	public static JComboBox<String> tablesBox;
+	public static ArrayList<JComboBox<String>> fieldsBoxes;
 	
 	private static Connection conn;
 	
 	//private static String[] tables = {"Authors", "Awards", "Awards Categories", "Awards Types", "Languages", "Notes", "Publishers", "Publications", "Publications Series", "Publications Authors", "Publications Content", "Reviews", "Tags", "Title", "Title Awards", "Title Series", "Title Tags", "Webpages"};
 	private static String[] tables;
-	private static String[] fields;
-	//TODO: Replace with a better solution
-	private static String[] operators = {" = ", " < ", " <= ", " > ", " >= "};
+	public static String[] fields;
 	
 	public ViewerFrame(Connection conn){
 		super();
@@ -55,7 +53,9 @@ public class ViewerFrame extends JFrame{
 	private JPanel initLayout(){
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BorderLayout());
-				
+		
+		
+		//Add Filter top line (table selection)
 		filtersPanel = new JPanel();
 		BoxLayout filterLayout = new BoxLayout(filtersPanel, BoxLayout.PAGE_AXIS);
 		filtersPanel.setLayout(filterLayout);
@@ -85,7 +85,25 @@ public class ViewerFrame extends JFrame{
 		filtersPanel.add(filterIntroPanel);
 		//filterPanel.add(Box.createVerticalGlue());
 
-		filtersPanel.add(createFilterPanel());
+		//Add initial Filter
+		filtersPanel.add(new FilterPanel(this));
+		
+		//Add Button line
+		buttonPanel = new JPanel();
+		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
+		buttonPanel.add(Box.createHorizontalGlue());
+		JButton validateButton = new JButton("Validate");
+		validateButton.addActionListener(e -> {
+			
+			//filtersPanel.add(createFilterPanel());
+			//mainPanel.validate();
+			//mainPanel.repaint();
+		});
+		buttonPanel.add(validateButton);
+		buttonPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+		buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+		buttonPanel.add(Box.createHorizontalGlue());
+		filtersPanel.add(buttonPanel);
 		
 		mainPanel.add(filtersPanel, BorderLayout.PAGE_START);
 		
@@ -101,68 +119,4 @@ public class ViewerFrame extends JFrame{
 		
 		return mainPanel;
 	}
-	
-	public JPanel createFilterPanel(){
-		
-		JPanel filterPanel = new JPanel();
-		filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.LINE_AXIS));
-		filterPanel.add(Box.createHorizontalGlue());
-		
-		JComboBox fieldsBox = new JComboBox<>(fields);
-		//fieldsBox.setMaximumSize(fieldsBox.getPreferredSize());
-		filterPanel.add(fieldsBox);
-		fieldsBoxes.add(fieldsBox);
-		JComboBox<String> operatorsCombox = new JComboBox<>(operators);
-		//operatorsCombox.setMaximumSize(operatorsCombox.getPreferredSize());
-		filterPanel.add(operatorsCombox);
-		
-		JTextField valueTextField = new JTextField("value");
-		valueTextField.setMaximumSize(operatorsCombox.getPreferredSize());
-		filterPanel.add(valueTextField);
-		
-		BufferedImage trashIcon = null;
-		try {
-			trashIcon = ImageIO.read(getClass().getResource("images/trash_mini.png"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		JButton trashButton = new JButton(new ImageIcon(trashIcon));
-		trashButton.setBorder(BorderFactory.createEmptyBorder());
-		trashButton.setContentAreaFilled(false);
-		filterPanel.add(trashButton);
-		
-		trashButton.addActionListener(e -> {
-			if(filtersPanel.getComponents().length > 3){
-				filtersPanel.remove(filterPanel);
-				fieldsBoxes.remove(fieldsBox);
-				mainPanel.validate();
-				mainPanel.repaint();
-			}
-		});
-		
-		BufferedImage plusIcon = null;
-		try {
-			plusIcon = ImageIO.read(getClass().getResource("images/plus_mini.png"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		JButton plusButton = new JButton(new ImageIcon(plusIcon));
-		plusButton.setBorder(BorderFactory.createEmptyBorder());
-		plusButton.setContentAreaFilled(false);
-		filterPanel.add(plusButton);
-		
-		plusButton.addActionListener(e -> {
-			filtersPanel.add(createFilterPanel());
-			mainPanel.validate();
-			mainPanel.repaint();
-		});
-
-	    filterPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-	    filterPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
-	    filterPanel.add(Box.createHorizontalGlue());
-	    
-		return filterPanel;
-	}
-	
-	
 }
