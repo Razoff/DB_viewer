@@ -2,43 +2,53 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JTable;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.table.DefaultTableModel;
 
 public class ViewerFrame extends JFrame{
 
 	public static JPanel mainPanel, filtersPanel, buttonPanel, displayPanel;
 	public static JLabel contentLabel;
+	public static JTable resultTable;
+	public static JSpinner limitSpinner;
 	public static JComboBox<String> tablesBox;
-	public static ArrayList<JComboBox<String>> fieldsBoxes;
+	public static ArrayList<FilterPanel> filterList;
 	
 	private static Connection conn;
 	
 	//private static String[] tables = {"Authors", "Awards", "Awards Categories", "Awards Types", "Languages", "Notes", "Publishers", "Publications", "Publications Series", "Publications Authors", "Publications Content", "Reviews", "Tags", "Title", "Title Awards", "Title Series", "Title Tags", "Webpages"};
-	private static String[] tables;
-	public static String[] fields;
+	public static String[] tables;
+	public static Map<String,String> fields;
+	public static ResultSet resultSet;
 	
 	public ViewerFrame(Connection conn){
 		super();
 		this.conn = conn;
 		tables = DBManager.getTablesList(conn);
 		fields = DBManager.getFieldList(conn, tables[0]);
-		fieldsBoxes = new ArrayList<>();
+		filterList = new ArrayList<>();
 		
 		setTitle("DB Viewer");
 		setSize(800, 600);
@@ -71,9 +81,11 @@ public class ViewerFrame extends JFrame{
 		tablesBox.setMaximumSize(tablesBox.getPreferredSize());
 		tablesBox.addActionListener(e -> {
 			fields = DBManager.getFieldList(conn, (String)tablesBox.getSelectedItem());
-			DefaultComboBoxModel model = new DefaultComboBoxModel(fields);
-			for(JComboBox<String> f : fieldsBoxes){
-				f.setModel(model);
+			String[] fieldsNames= fields.keySet().toArray(new String[fields.keySet().size()]);
+			Arrays.sort(fieldsNames);
+			for(FilterPanel p : filterList){
+				DefaultComboBoxModel model = new DefaultComboBoxModel(fieldsNames);
+				p.fieldsBox.setModel(model);
 			}
 		});
 		filterIntroPanel.add(tablesBox);
@@ -94,10 +106,24 @@ public class ViewerFrame extends JFrame{
 		buttonPanel.add(Box.createHorizontalGlue());
 		JButton validateButton = new JButton("Validate");
 		validateButton.addActionListener(e -> {
-			
-			//filtersPanel.add(createFilterPanel());
-			//mainPanel.validate();
-			//mainPanel.repaint();
+			List<Filter> filters = new ArrayList<>();
+			for(FilterPanel p : filterList){
+				String left = (String)p.fieldsBox.getSelectedItem();
+				String op =  (String)p.operatorsCombox.getSelectedItem();
+				String right = p.valueTextField.getText();
+				if(!right.equals(" Default value ")){
+					filters.add(new Filter(left,op,right));
+				}
+			}
+			ResultSet res = DBManager.doQuery(conn, fields,(String)tablesBox.getSelectedItem(), filters, (Integer)limitSpinner.getValue());
+			try {
+				resultTable.setModel(buildTableModel(res));
+				mainPanel.validate();
+				mainPanel.repaint();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			  
 		});
 		buttonPanel.add(validateButton);
 		buttonPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -107,16 +133,55 @@ public class ViewerFrame extends JFrame{
 		
 		mainPanel.add(filtersPanel, BorderLayout.PAGE_START);
 		
+		//Center part of the window
+		
 		displayPanel = new JPanel();
 		displayPanel.setBorder(BorderFactory.createCompoundBorder(
 	    	       BorderFactory.createEmptyBorder(10, 10, 10, 10),
 	    	       BorderFactory.createMatteBorder(2, 0, 0, 0, Color.BLACK)));
 		//centerPanel.setSize(800,400);
-		contentLabel = new JLabel("Test");
-		displayPanel.add(contentLabel);
+		//contentLabel = new JLabel("Test");
+		//displayPanel.add(contentLabel);
+		displayPanel.setLayout(new BorderLayout());
+		resultTable = new JTable();
+		JScrollPane scrollPane = new JScrollPane(resultTable);
+		resultTable.setFillsViewportHeight(true);
+		displayPanel.add(scrollPane, BorderLayout.CENTER);
 		mainPanel.add(displayPanel, BorderLayout.CENTER);
 		
-		
+		//Bottom
+		JPanel bottomPanel = new JPanel();
+		JLabel limitLabel = new JLabel("Limite (0 = inf) ");
+		bottomPanel.add(limitLabel);
+		limitSpinner = new JSpinner(new SpinnerNumberModel(20, 0, Integer.MAX_VALUE,1));
+		bottomPanel.add(limitSpinner);
+		mainPanel.add(bottomPanel, BorderLayout.PAGE_END);
+				
 		return mainPanel;
+	}
+	
+	public static DefaultTableModel buildTableModel(ResultSet rs)  throws SQLException {
+
+	    ResultSetMetaData metaData = rs.getMetaData();
+
+	    // names of columns
+	    Vector<String> columnNames = new Vector<String>();
+	    int columnCount = metaData.getColumnCount();
+	    for (int column = 1; column <= columnCount; column++) {
+	        columnNames.add(metaData.getColumnName(column));
+	    }
+
+	    // data of the table
+	    Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+	    while (rs.next()) {
+	        Vector<Object> vector = new Vector<Object>();
+	        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+	            vector.add(rs.getObject(columnIndex));
+	        }
+	        data.add(vector);
+	    }
+	    
+	    return new DefaultTableModel(data, columnNames);
+
 	}
 }
